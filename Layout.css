@@ -1,0 +1,10 @@
+div{
+    border: 1px solid black;
+    padding: 10px;
+    margin: 10px;
+}
+
+#header,#footer{
+    background-color:yellowgreen;
+
+}
