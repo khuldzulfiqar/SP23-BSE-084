@@ -39,7 +39,7 @@
     text-decoration: none;
     color: black;
 }
-#MainImage img{
+.MainImage img{
     width: 100%;
 }
 h2{
@@ -56,15 +56,9 @@ h2{
     height: 100%;
     padding: 15px;
     margin: 5px;
+    transition: transform 0.3s ease, filter 0.3s ease;
 }
-#Extention{
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: 60px;
-    z-index: 1000;
-    
-}
+
 .imageContainer{
     text-align: center;
 }
@@ -105,4 +99,23 @@ h2{
 #footer #button{
     background-color: gray;
     color: white;
+}
+#icons{
+    display:flex;
+    background-color: black;
+    color: white;
+}
+#icons i{
+    margin-bottom: 50px;
+    padding:10px 
+}
+#icons #first{
+    margin-left: 100px;
+}
+
+
+.imageContainer img:hover {
+    transform: scale(1.1); 
+    
+    
 }
