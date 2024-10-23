@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>My Portfolio</title>
+    <link rel="stylesheet" href="Midterm.css">
+    <script defer src="MidTerm.js"></script>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <ul>
+                <li><a href="#about">About</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#contact">Contact</a></li>
+            </ul>
+        </nav>
+        <h1>Welcome to My Portfolio</h1>
+    </header>
+
+    <section id="about">
+        <h2>About Me</h2>
+        <p>Hello! I’m Khuld Zulfiqar, a web developer focusing on creating functional and visually appealing websites.</p>
+    </section>
+
+    <section id="projects">
+        <h2>Semester-wise Projects</h2>
+
+        <!-- Semester 1 Projects -->
+        <h3>Semester 1 Projects</h3>
+        <div class="project-grid">
+            <div class="project-card">
+                <img src="image copy.png" alt="Project 1 Image">
+                <h4>Project 1</h4>
+                <p><strong>Summary:</strong> A responsive website using HTML, CSS.</p>
+                <button id="project1" onclick="loadDescription('project1')">Show Description</button>
+                <div class="description" id="project1-description"></div>
+            </div>
+        </div>
+
+        <!-- Semester 2 Projects -->
+        <h3>Semester 2 Projects</h3>
+        <div class="project-grid">
+            <div class="project-card">
+                <img src="image.png" alt="Project 2 Image">
+                <h4>Project 2</h4>
+                <p><strong>Summary:</strong> An interactive web app using JavaScript and APIs.</p>
+                <button id="project2" onclick="loadDescription('project2')">Show Description</button>
+                <div class="description" id="project2-description"></div>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact">
+        <h2>Contact Me</h2>
+        <p>Email: your.email@example.com</p>
+    </section>
+
+    <footer>
+        <p>© 2024 Khuld Zulfiqar. All Rights Reserved.</p>
+    </footer>
+
+</body>
+</html>
