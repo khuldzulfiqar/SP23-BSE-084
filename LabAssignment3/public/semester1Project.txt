@@ -1,0 +1,11 @@
+This project is a responsive website built with HTML and CSS. It adapts to different screen sizes, ensuring a seamless user experience on desktops and mobile devices.
+
+Key Features:
+
+Responsive Design: Adjusts layout using CSS media queries.
+User-Friendly Navigation: Clear menu for easy access to sections.
+Modern Styling: Clean layout with appealing colors and typography.
+Technologies Used:
+
+HTML5
+CSS3

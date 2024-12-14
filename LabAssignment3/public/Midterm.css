@@ -1,0 +1,120 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    line-height: 1.6;
+    background-color: #f0f0f0;
+    color: #333;
+    padding: 0 20px; /* Add padding to body for better spacing */
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
+    position: sticky; /* This makes the header sticky */
+    top: 0; /* Sticks the header at the top */
+    z-index: 1000;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+nav ul li {
+    margin: 0 15px;
+}
+
+nav ul li a {
+    color: white;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s; /* Smooth transition */
+}
+
+nav ul li a:hover {
+    color: #ffcc00; /* Change color on hover for better visibility */
+}
+
+h1 {
+    margin-top: 10px;
+    font-size: 2.5rem;
+}
+
+section {
+    padding: 40px 20px;
+    text-align: center;
+}
+
+#about {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
+}
+
+#projects {
+    background-color: #f9f9f9;
+    padding-top: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add shadow */
+}
+
+.project-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    justify-content: center;
+}
+
+.project-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Slightly stronger shadow */
+    transition: transform 0.3s; /* Transition for scaling effect */
+}
+
+.project-card:hover {
+    transform: translateY(-5px); /* Raise card on hover */
+}
+
+.project-card img {
+    width: 50%; /* Set image width to 50% */
+    height: auto; /* Maintain aspect ratio */
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.project-card button {
+    padding: 10px 15px; /* Add horizontal padding */
+    background-color: #333;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s; /* Smooth transition */
+}
+
+.project-card button:hover {
+    background-color: #555;
+}
+
+.description {
+    margin-top: 15px;
+    font-size: 14px;
+    color: #555;
+    padding: 10px; /* Add padding for better readability */
+    border: 1px solid #e0e0e0; /* Light border for distinction */
+    border-radius: 5px; /* Rounded corners */
+    background-color: #f8f8f8; /* Light background for description */
+}
+
