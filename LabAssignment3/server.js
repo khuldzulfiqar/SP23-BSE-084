@@ -4,6 +4,8 @@ let server = express(); // Consistently use 'server' as the variable name
 server.set("view engine", "ejs"); // Set EJS as the view engine
 
 server.use(express.static("public")); // Serve static files from the 'public' folder
+const expressLayouts = require("express-ejs-layouts");
+server.use(expressLayouts);
 
 const mongoose = require('mongoose');
 
@@ -41,12 +43,14 @@ mongoose
   
 
 server.get("/", (req, res) => { // Use 'server' instead of 'app'
-  res.render("index"); // Render the 'index.ejs' view
+  res.render("index",{ layout: false }); // Render the 'index.ejs' view
 });
+
 // Admin panel route
 server.get("/admin", (req, res) => {
-  res.render("admin"); // Render the 'admin.ejs' view
+  return res.render("admin"); // Specify the admin layout
 });
+
 
 // Manage Categories route
 const Category = require('./models/category'); // Import the Category model
