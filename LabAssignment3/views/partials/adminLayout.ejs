@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/styles.css"> <!-- Link to your CSS -->
+</head>
+<body>
+    <header>
+        <nav>
+            <ul>
+                <li><a href="/admin">Admin Panel</a></li>
+                <li><a href="/">Homepage</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <%- body %> <!-- This will inject the content of your views -->
+    </main>
+
+    <footer>
+        <%- include('partials/footer') %> <!-- Including footer -->
+    </footer>
+</body>
+</html>

@@ -2,12 +2,14 @@
   "dependencies": {
     "ejs": "^3.1.10",
     "express": "^4.21.2",
-    "install": "^0.13.0"
+    "express-ejs-layouts": "^2.5.1",
+    "install": "^0.13.0",
+    "mongoose": "^8.9.0",
+    "multer": "^1.4.5-lts.1"
   },
   "name": "labassignment3",
   "version": "1.0.0",
   "main": "server.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
