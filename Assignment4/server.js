@@ -316,7 +316,17 @@ server.post('/checkout', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error processing the order. Please try again.' });
   }
 });
-
+//For orders in admin panel
+// Route to display all orders in the admin panel
+server.get('/admin/orders', async (req, res) => {
+  try {
+    const orders = await Order.find().populate('products'); // Fetch all orders and populate the product details
+    res.render('admin/orders', { orders }); // Render the orders EJS template and pass orders data
+  } catch (err) {
+    console.error('Error fetching orders:', err);
+    res.status(500).send('Error fetching orders.');
+  }
+});
 
 server.listen(5000, () => {
   console.log("Server Started at http://localhost:5000");
