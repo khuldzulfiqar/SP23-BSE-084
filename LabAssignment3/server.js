@@ -1,13 +1,19 @@
 const express = require("express");
 let server = express(); // Consistently use 'server' as the variable name
 
+const bodyParser = require("body-parser");
+const Product = require("./models/products");
+const Category = require('./models/category'); 
+const mongoose = require('mongoose');
+const expressLayouts = require("express-ejs-layouts");
+
 server.set("view engine", "ejs"); // Set EJS as the view engine
 
 server.use(express.static("public")); // Serve static files from the 'public' folder
-const expressLayouts = require("express-ejs-layouts");
+
 server.use(expressLayouts);
 
-const mongoose = require('mongoose');
+
 
 mongoose
   .connect('mongodb://localhost:27017/Fusionic')
@@ -42,9 +48,37 @@ mongoose
   const upload = multer({ storage, fileFilter });
   
 
-server.get("/", (req, res) => { // Use 'server' instead of 'app'
-  res.render("index",{ layout: false }); // Render the 'index.ejs' view
+// Set the number of products per page
+const ITEMS_PER_PAGE = 6;
+
+// Route to fetch and render products with pagination
+server.get('/', async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Get the page number from the query parameter (default to page 1)
+  const skip = (page - 1) * ITEMS_PER_PAGE; // Calculate the number of products to skip
+
+  try {
+      // Fetch products with pagination
+      const products = await Product.find()
+          .skip(skip) // Skip products based on the page
+          .limit(ITEMS_PER_PAGE); // Limit the number of products per page
+
+      // Get the total number of products in the database
+      const totalProducts = await Product.countDocuments();
+      const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE); // Calculate total pages
+
+      // Render the homepage with products and pagination data
+      res.render('homepage', {
+          products: products,
+          currentPage: page, // Current page number
+          totalPages: totalPages, // Total number of pages
+          layout: false
+      });
+  } catch (err) {
+      console.error("Error fetching products:", err);
+      res.status(500).send("Server error");
+  }
 });
+
 
 // Admin panel route
 server.get("/admin", (req, res) => {
@@ -53,11 +87,6 @@ server.get("/admin", (req, res) => {
 
 
 // Manage Categories route
-const Category = require('./models/category'); // Import the Category model
-
-const Product = require('./models/products'); // Import the products model
-
-
 server.get("/add-category", async (req, res) => {
   try {
     const categories = await Category.find(); // Fetch all categories
@@ -73,7 +102,7 @@ server.get("/categories/add", (req, res) => {
   res.render("admin/addCategory"); // Create this EJS file
 });
 //Post
-const bodyParser = require("body-parser");
+
 server.use(bodyParser.urlencoded({ extended: true }));
 
 server.post("/categories/add", async (req, res) => {
