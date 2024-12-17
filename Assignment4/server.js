@@ -129,7 +129,7 @@ server.get("/admin", authMiddleware, adminMiddleware, (req, res) => {
 server.get("/add-category", async (req, res) => {
   try {
     const categories = await Category.find(); // Fetch all categories
-    res.render("admin/manageCategories", { categories },{ layout:"layout" }); // Pass categories to the EJS view
+    res.render("admin/manageCategories", { categories , layout:"layout" }); // Pass categories to the EJS view
   } catch (err) {
     res.status(500).send("Error fetching categories");
   }
