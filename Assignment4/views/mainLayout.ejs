@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Optional Custom Styles -->
+    <link rel="stylesheet" href="/styles.css">
+    <%-defineContent("styles-area") %>
+</head>
+
+<header>
+    <div class="container-fluid logo d-flex justify-content-between align-items-center">
+        <!-- Logo Section -->
+        <div class="mx-auto">
+            <img src="/images/image.png" alt="Fusionic.pk">
+        </div>
+    
+        <!-- Icons Section -->
+        <div class="d-flex align-items-center">
+            
+            
+            <!-- Cart Icon with Badge -->
+            <div class="position-relative">
+                <a href="/cart" class="text-dark">
+                    <i class="fa-solid fa-cart-shopping px-2 fa-lg"></i>
+                    <% if (cartCount > 0) { %>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            <%= cartCount %>
+                        </span>
+                    <% } %>
+                </a>
+            </div>
+            
+            <!-- Admin Panel or Login Button -->
+            <div class="px-2">
+                <a href="/login" class="btn btn-sm btn-dark">Login</a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Menu -->
+    <div class="container-fluid d-flex justify-content-center sticky-top pt-3 bg-light menu">
+        <ul class="d-flex list-unstyled mb-0">
+            <li><a href="/" class="text-dark text-decoration-none px-3">Home</a></li>
+            <li><a href="#" class="text-dark text-decoration-none px-3">Button Up S'24</a></li>
+            <li><a href="#" class="text-dark text-decoration-none px-3">CARGOS S'24</a></li>
+            <li><a href="#" class="text-dark text-decoration-none px-3">SUMMER KNIT'24</a></li>
+            <li><a href="#" class="text-dark text-decoration-none px-3">ABOUT US</a></li>
+            <li><a href="#" class="text-dark text-decoration-none px-3">SHOP</a></li>
+            <% if (user && user.role.includes("admin")) { %>
+                <li><a href="/admin" class="text-dark text-decoration-none px-3">Admin Panel</a></li>
+            <% } %>
+        </ul>
+    </div>
+    
+    
+</header>
+ 
+<!-- Main Content -->
+<main class="container mt-4">
+    <%- body %> <!-- This will inject the content of your views -->
+</main>
+
+<footer>
+ <div class="d-flex justify-content-between bg-dark text-light py-4 px-4">
+    <div>
+        <h2 class="fw-normal">About</h2>
+        <p>
+            We are Fusionic, a leading provider of cutting-edge fusion solutions. Our<br>
+            mission is to create innovative and exceptional products and services that <br>
+            cater to our customers' needs. With a team of dedicated professionals, 
+            we <br> strive for excellence and customer satisfaction.
+        </p>
+    </div>
+ 
+    <div>
+        <h3 class="fw-normal">Shop</h3>
+        <ul class="list-unstyled">
+            <li><a class="text-decoration-none text-light" href="">Home</a></li>
+            <li><a class="text-decoration-none text-light" href="">Button Up S'24</a></li>
+            <li><a class="text-decoration-none text-light" href="">CARGOS S'24</a></li>
+            <li><a class="text-decoration-none text-light" href="">SUMMER KNIT'24</a></li>
+            <li><a class="text-decoration-none text-light" href="">WINTER KNIT'24</a></li>
+            <li><a class="text-decoration-none text-light" href="">ABOUT US</a></li>
+            <li><a class="text-decoration-none text-light" href="">SHOP</a></li>
+        </ul>
+    </div>
+ 
+    <div>
+        <h3 class="fw-normal">Info</h3>
+        <ul class="list-unstyled">
+            <li><a class="text-decoration-none text-light" href="">Search</a></li>
+            <li><a class="text-decoration-none text-light" href="">Contact</a></li>
+            <li><a class="text-decoration-none text-light" href="">Complaints And Queries</a></li>
+            <li><a class="text-decoration-none text-light" href="">Exchange And Shipping </a></li>
+            <li><a class="text-decoration-none text-light" href="">Track Order</a></li>
+            <li><a class="text-decoration-none text-light" href="">Care Instructions</a></li>
+        </ul>
+    </div>
+ 
+    <div>
+        <div>
+            <input type="email" placeholder="Enter your email">
+            <button id="button">Join</button>
+        </div>
+    </div>
+ </div>
+ 
+ <div class="bg-dark text-light px-4 py-4">
+     <i class="fa-brands fa-facebook px-1"></i>
+     <i class="fa-brands fa-instagram px-1"></i>
+     <i class="fa-brands fa-youtube px-1"></i>
+     <i class="fa-brands fa-tiktok px-1"></i>
+ </div>
+</footer>
+
+    
+</html>
