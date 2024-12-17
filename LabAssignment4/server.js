@@ -113,12 +113,12 @@ server.post("/login", async (req, res) => {
   }
 });
 
-// Logout Route
 server.get("/logout", (req, res) => {
   req.session.destroy(() => {
-    res.redirect("/login",{ layout: "mainLayout" });
+    res.redirect("/login");  // Redirect to the login page
   });
 });
+
 
 /********* AUTHORIZED ADMIN ROUTES *********/
 server.get("/admin", authMiddleware, adminMiddleware, (req, res) => {
@@ -181,17 +181,6 @@ server.get("/categories/delete/:id", async (req, res) => {
     res.status(500).send("Error deleting category");
   }
 });
-
-// Manage Products page
-/*server.get("/add-product", async (req, res) => {
-  try {
-    const products = await Product.find().populate("category"); // Populate category info
-    res.render("admin/manageProducts", { products, layout: "layout" });
-  } catch (error) {
-    console.error("Error fetching products:", error);
-    res.status(500).send("Error fetching products.");
-  }
-});*/
 
 
 // Manage Products Page (Search, Filter, Sort, and Pagination)
