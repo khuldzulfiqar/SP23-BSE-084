@@ -1,32 +1,55 @@
 const express = require("express");
-let server = express(); // Consistently use 'server' as the variable name
-// Middleware for sessions
-const session = require('express-session');
+const server = express();
+const session = require("express-session");
+const bcrypt = require("bcryptjs");
 const bodyParser = require("body-parser");
-const Product = require("./models/products");
-const Category = require('./models/category'); 
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 const expressLayouts = require("express-ejs-layouts");
-const Order = require('./models/order'); // Import the Order model
-server.use(session({ secret: 'secretKey', resave: false, saveUninitialized: true }));
-server.use(bodyParser.urlencoded({ extended: true }));  // For form data
-server.use(bodyParser.json());  // For JSON data
+const multer = require("multer");
+const path = require("path");
 
-server.set("view engine", "ejs"); // Set EJS as the view engine
+// Models
+const User = require("./models/user.model");
+const Product = require("./models/products");
+const Category = require("./models/category");
+const Order = require("./models/order");
 
-server.use(express.static("public")); // Serve static files from the 'public' folder
+// Middlewares
+const authMiddleware = require("./middlewares/auth-middleware");
+const adminMiddleware = require("./middlewares/admin-middleware");
+const siteMiddleware = require("./middlewares/site-middleware");
 
+// Session Setup
+server.use(
+  session({
+    secret: "secretKey",
+    resave: false,
+    saveUninitialized: true,
+  })
+);
+
+server.use(bodyParser.urlencoded({ extended: true }));
+server.use(bodyParser.json());
+server.set("view engine", "ejs");
+server.use(express.static("public"));
 server.use(expressLayouts);
 
 // MongoDB connection
 mongoose
-  .connect('mongodb://localhost:27017/Fusionic')
+  .connect("mongodb://localhost:27017/Fusionic")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB", err));
 
+// Middleware for global cart count
+server.use((req, res, next) => {
+  if (!req.session.cart) req.session.cart = [];
+  res.locals.cartCount = req.session.cart.length;
+  res.locals.user = req.session.user || null; // Make user data available globally
+  next();
+});
+
 // Multer setup for image uploads
-const multer = require("multer");
-const path = require("path");
+//const path = require("path");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./public/uploads"); // Directory to store uploaded images
@@ -48,53 +71,65 @@ const upload = multer({ storage, fileFilter });
 // Set the number of products per page
 const ITEMS_PER_PAGE = 6;
 
-// Global middleware for cartCount
-server.use((req, res, next) => {
-  // Initialize cart if it doesn't exist
-  if (!req.session.cart) req.session.cart = [];
-  // Pass cart count globally to all views
-  res.locals.cartCount = req.session.cart.length;
-  next();
+/********* AUTHENTICATION ROUTES *********/
+// Register Page
+server.get("/register", (req, res) => {
+  res.render("admin/auth/register",{ layout: "mainLayout" });
 });
 
-// Route to fetch and render products with pagination
-server.get('/', async (req, res) => {
-  const page = parseInt(req.query.page) || 1; // Get the page number from the query parameter (default to page 1)
-  const skip = (page - 1) * ITEMS_PER_PAGE; // Calculate the number of products to skip
+server.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
-    // Fetch products with pagination
-    const products = await Product.find()
-      .skip(skip) // Skip products based on the page
-      .limit(ITEMS_PER_PAGE); // Limit the number of products per page
-
-    // Get the total number of products in the database
-    const totalProducts = await Product.countDocuments();
-    const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE); // Calculate total pages
-
-    // Render the homepage with products and pagination data
-    res.render('homepage', {
-      products: products,
-      currentPage: page, // Current page number
-      totalPages: totalPages, // Total number of pages
-      layout: false
-    });
+    const user = new User({ name, email, password: hashedPassword, role: ["user"] });
+    await user.save();
+    res.redirect("/login");
   } catch (err) {
-    console.error("Error fetching products:", err);
-    res.status(500).send("Server error");
+    console.error("Error registering user:", err);
+    res.status(500).send("Error registering user.");
   }
 });
 
-// Admin panel route
-server.get("/admin", (req, res) => {
-  return res.render("admin"); // Specify the admin layout
+// Login Page
+server.get("/login", (req, res) => {
+  res.render("admin/auth/login",{ layout:"mainLayout" });
+});
+
+server.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).send("Invalid email or password.");
+
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) return res.status(400).send("Invalid email or password.");
+
+    req.session.user = user; // Set user in session
+    res.redirect(user.role.includes("admin") ? "/admin" : "/");
+  } catch (err) {
+    console.error("Error logging in:", err);
+    res.status(500).send("Error logging in.");
+  }
+});
+
+// Logout Route
+server.get("/logout", (req, res) => {
+  req.session.destroy(() => {
+    res.redirect("/login",{ layout: "mainLayout" });
+  });
+});
+
+/********* AUTHORIZED ADMIN ROUTES *********/
+server.get("/admin", authMiddleware, adminMiddleware, (req, res) => {
+  res.render("admin",{ layout: "layout" });
 });
 
 // Manage Categories route
 server.get("/add-category", async (req, res) => {
   try {
     const categories = await Category.find(); // Fetch all categories
-    res.render("admin/manageCategories", { categories }); // Pass categories to the EJS view
+    res.render("admin/manageCategories", { categories , layout:"layout" }); // Pass categories to the EJS view
   } catch (err) {
     res.status(500).send("Error fetching categories");
   }
@@ -102,7 +137,7 @@ server.get("/add-category", async (req, res) => {
 
 // Add a new category
 server.get("/categories/add", (req, res) => {
-  res.render("admin/addCategory"); // Create this EJS file
+  res.render("admin/addCategory",{ layout: "layout" }); // Create this EJS file
 });
 
 // Post to add a category
@@ -121,7 +156,7 @@ server.post("/categories/add", async (req, res) => {
 server.get("/categories/edit/:id", async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
-    res.render("admin/editCategory", { category }); // Create this EJS file
+    res.render("admin/editCategory", { category ,layout: "layout" }); // Create this EJS file
   } catch (err) {
     res.status(500).send("Error fetching category");
   }
@@ -147,44 +182,68 @@ server.get("/categories/delete/:id", async (req, res) => {
   }
 });
 
-/*// Manage Products page
-server.get("/add-product", async (req, res) => {
+// Manage Products page
+/*server.get("/add-product", async (req, res) => {
   try {
     const products = await Product.find().populate("category"); // Populate category info
-    res.render("admin/manageProducts", { products });
+    res.render("admin/manageProducts", { products, layout: "layout" });
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).send("Error fetching products.");
   }
 });*/
+
+
+// Manage Products Page (Search, Filter, Sort, and Pagination)
 server.get("/add-product", async (req, res) => {
+  const { search, category, sort, page = 1 } = req.query;
+
+  const perPage = 5; // Number of products per page
+  const query = {};
+
+  // Search Logic
+  if (search) {
+    query.name = { $regex: search, $options: "i" }; // Case-insensitive search
+  }
+
+  // Filter by Category
+  if (category) {
+    query.category = category;
+  }
+
+  // Sorting Logic
+  let sortOption = {};
+  if (sort) {
+    if (sort === "price_asc") sortOption.price = 1;
+    else if (sort === "price_desc") sortOption.price = -1;
+    else if (sort === "name_asc") sortOption.name = 1;
+    else if (sort === "name_desc") sortOption.name = -1;
+  }
+
   try {
-    const { search, category, price } = req.query;
+    // Fetch total products count for pagination
+    const totalProducts = await Product.countDocuments(query);
 
-    // Find all categories for the filter dropdown
+    // Fetch filtered, sorted, and paginated products
+    const products = await Product.find(query)
+      .populate("category")
+      .sort(sortOption)
+      .skip((page - 1) * perPage)
+      .limit(perPage);
+
+    // Fetch all categories for filtering dropdown
     const categories = await Category.find();
-
-    // Build the filter query
-    let filter = {};
-    if (category) {
-      filter.category = category;
-    }
-    if (price) {
-      filter.price = { $lte: price }; // Filter by max price
-    }
-    if (search) {
-      filter.name = { $regex: search, $options: 'i' }; // Case-insensitive search by name
-    }
-
-    // Retrieve products with the applied filters
-    const products = await Product.find(filter).populate('category');
 
     res.render("admin/manageProducts", {
       products,
       categories,
-      search, // Pass search keyword to ejs
-      categoryFilter: category, // Pass selected category to ejs
-      priceFilter: price, // Pass selected price to ejs
+      currentPage: parseInt(page),
+      totalPages: Math.ceil(totalProducts / perPage),
+      search,
+      selectedCategory: category,
+      sort,
+      perPage,
+      layout: "layout"
     });
   } catch (error) {
     console.error("Error fetching products:", error);
@@ -197,7 +256,7 @@ server.get("/add-product", async (req, res) => {
 server.get("/products/add", async (req, res) => {
   try {
     const categories = await Category.find(); // Fetch all categories for the dropdown
-    res.render("admin/addProduct", { categories });
+    res.render("admin/addProduct", { categories,layout: "layout"  });
   } catch (error) {
     console.error("Error fetching categories:", error);
     res.status(500).send("Error fetching categories.");
@@ -231,7 +290,7 @@ server.get("/products/edit/:id", async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     const categories = await Category.find(); // Fetch categories for the dropdown
-    res.render("admin/editProduct", { product, categories });
+    res.render("admin/editProduct", { product, categories,layout: "layout" });
   } catch (error) {
     console.error("Error fetching product:", error);
     res.status(500).send("Error fetching product.");
@@ -276,18 +335,42 @@ server.get("/products/delete/:id", async (req, res) => {
   }
 });
 
-// Initialize cart 
-server.use((req, res, next) => {
-  if (!req.session.cart) req.session.cart = [];
-  next();
+/********* USER ROUTES *********/
+// Route to fetch and render products with pagination
+server.get('/', async (req, res) => {
+  const page = parseInt(req.query.page) || 1; // Get the page number from the query parameter (default to page 1)
+  const skip = (page - 1) * ITEMS_PER_PAGE; // Calculate the number of products to skip
+
+  try {
+    // Fetch products with pagination
+    const products = await Product.find()
+      .skip(skip) // Skip products based on the page
+      .limit(ITEMS_PER_PAGE); // Limit the number of products per page
+
+    // Get the total number of products in the database
+    const totalProducts = await Product.countDocuments();
+    const totalPages = Math.ceil(totalProducts / ITEMS_PER_PAGE); // Calculate total pages
+
+    // Render the homepage with products and pagination data
+    res.render('homepage', {
+      products: products,
+      currentPage: page, // Current page number
+      totalPages: totalPages, // Total number of pages
+      layout:"mainLayout"
+    });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).send("Server error");
+  }
 });
 
-// Route to add product to the cart
-server.post('/cart/add', (req, res) => {
+// Route to add product to cart
+server.post("/cart/add", (req, res) => {
   const { productId } = req.body;
-  req.session.cart.push(productId); // Add product to the cart
-  res.redirect('back'); // Redirect back to the previous page
+  req.session.cart.push(productId);
+  res.redirect("back");
 });
+
 //Route for cart page
 server.get('/cart', async (req, res) => {
   try {
@@ -298,7 +381,7 @@ server.get('/cart', async (req, res) => {
     res.render('cart', {
       products: productsInCart,
       cartCount: req.session.cart.length, // Show number of products in cart
-      layout:false
+      layout:"mainLayout"
     });
   } catch (err) {
     console.error("Error fetching cart products:", err);
@@ -317,7 +400,8 @@ server.get('/checkout', async (req, res) => {
     // Render checkout page with products and total price
     res.render('checkout', {
       products: productsInCart,
-      totalPrice: totalPrice
+      totalPrice: totalPrice,
+      layout:"mainLayout"
     });
   } catch (err) {
     console.error("Error fetching cart products:", err);
@@ -351,18 +435,19 @@ server.post('/checkout', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error processing the order. Please try again.' });
   }
 });
-//For orders in admin panel
-// Route to display all orders in the admin panel
-server.get('/admin/orders', async (req, res) => {
+
+// Admin Orders (protected)
+server.get("/admin/orders", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const orders = await Order.find().populate('products'); // Fetch all orders and populate the product details
-    res.render('admin/orders', { orders }); // Render the orders EJS template and pass orders data
+    const orders = await Order.find().populate("products");
+    res.render("admin/orders", { orders, layout: "layout" });
   } catch (err) {
-    console.error('Error fetching orders:', err);
-    res.status(500).send('Error fetching orders.');
+    console.error("Error fetching orders:", err);
+    res.status(500).send("Error fetching orders.");
   }
 });
 
+// Start Server
 server.listen(5000, () => {
   console.log("Server Started at http://localhost:5000");
 });
