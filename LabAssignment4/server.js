@@ -77,20 +77,6 @@ server.get("/register", (req, res) => {
   res.render("admin/auth/register",{ layout: "mainLayout" });
 });
 
-/*server.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  try {
-    const user = new User({ name, email, password: hashedPassword, role: ["user"] });
-    await user.save();
-    res.redirect("/login");
-  } catch (err) {
-    console.error("Error registering user:", err);
-    res.status(500).send("Error registering user.");
-  }
-});
-*/
 server.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
 
