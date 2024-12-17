@@ -77,13 +77,46 @@ server.get("/register", (req, res) => {
   res.render("admin/auth/register",{ layout: "mainLayout" });
 });
 
-server.post("/register", async (req, res) => {
+/*server.post("/register", async (req, res) => {
   const { name, email, password } = req.body;
   const hashedPassword = await bcrypt.hash(password, 10);
 
   try {
     const user = new User({ name, email, password: hashedPassword, role: ["user"] });
     await user.save();
+    res.redirect("/login");
+  } catch (err) {
+    console.error("Error registering user:", err);
+    res.status(500).send("Error registering user.");
+  }
+});
+*/
+server.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  try {
+    // Check if user already exists
+    const existingUser = await User.findOne({ email: email });
+    if (existingUser) {
+      // User already exists, render an error message
+      return res.status(400).send("User already exists. Please log in.");
+    }
+
+    // If user does not exist, hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Create a new user
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword,
+      role: ["user"], // Assign default role as "user"
+    });
+
+    // Save the new user
+    await user.save();
+
+    // Redirect to the login page after successful registration
     res.redirect("/login");
   } catch (err) {
     console.error("Error registering user:", err);
