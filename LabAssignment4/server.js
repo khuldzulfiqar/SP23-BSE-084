@@ -444,10 +444,13 @@ server.post('/checkout', async (req, res) => {
   }
 });
 
+
 // Admin Orders (protected)
 server.get("/admin/orders", authMiddleware, adminMiddleware, async (req, res) => {
   try {
-    const orders = await Order.find().populate("products");
+    const orders = await Order.find()
+      .populate("products")
+      .sort({ createdAt: -1 }); // Sort by creation date in descending order
     res.render("admin/orders", { orders, layout: "layout" });
   } catch (err) {
     console.error("Error fetching orders:", err);

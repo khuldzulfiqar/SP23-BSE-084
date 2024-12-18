@@ -49,6 +49,7 @@ server.use((req, res, next) => {
 });
 
 // Multer setup for image uploads
+//const path = require("path");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     cb(null, "./public/uploads"); // Directory to store uploaded images
@@ -442,6 +443,7 @@ server.post('/checkout', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error processing the order. Please try again.' });
   }
 });
+
 
 // Admin Orders (protected)
 server.get("/admin/orders", authMiddleware, adminMiddleware, async (req, res) => {
